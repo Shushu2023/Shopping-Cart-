@@ -90,9 +90,9 @@ const Products = (props) => {
   } = ReactBootstrap;
   //  Fetch Data
   const { Fragment, useState, useEffect, useReducer } = React;
-  const [query, setQuery] = useState("http://localhost:1337/products");
+  const [query, setQuery] = useState("http://localhost:1337/api/products");
   const [{ data, isLoading, isError }, doFetch] = useDataApi(
-    "http://localhost:1337/products",
+    "http://localhost:1337/api/products",
     {
       data: [],
     }
@@ -102,25 +102,38 @@ const Products = (props) => {
   const addToCart = (e) => {
     let name = e.target.name;
     let item = items.filter((item) => item.name == name);
+     if(item[0].instock == 0) return;// if your try to add an item that is not instock you cann't 
     console.log(`add to Cart ${JSON.stringify(item)}`);
+    item[0].instock = item[0].instock - 1;//reduce the stock of the item  by 1
     setCart([...cart, ...item]);
     //doFetch(query);
   };
   const deleteCartItem = (index) => {
     let newCart = cart.filter((item, i) => index != i);
-    setCart(newCart);
+    let target = cart.filter((item,index)=>delIndex == index);
+    //restock the item deleted from the cart
+     let newItems = items.map((item,index)=>{
+        if(item.name == target[0].name) 
+          item.instock = item.instock + 1;
+          return item;
+      });
+    // set the cart to be the newCart excluding the item deleted
+         setCart(newCart);
+     // set the items to the updated deleted item increased stock
+         setItems(newItems);
   };
   const photos = ["apple.png", "orange.png", "beans.png", "cabbage.png"];
 
   let list = items.map((item, index) => {
     //let n = index + 1049;
-    //let url = "https://picsum.photos/id/" + n + "/50/50";
+    //let uhit = "https://picsum.photos/id/" + n;
 
     return (
       <li key={index}>
         <Image src={photos[index % 4]} width={70} roundedCircle></Image>
+         {/*<Image src={uhit]} width={70} roundedCircle></Image>*/}
         <Button variant="primary" size="large">
-          {item.name}:{item.cost}
+          {item.name}: ${item.cost} -Stock={item.instock}
         </Button>
         <input name={item.name} type="submit" onClick={addToCart}></input>
       </li>
